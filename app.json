@@ -22,11 +22,11 @@
     "web": {
       "bundler": "metro"
     },
-    "plugins": [
-      "expo-asset"
-    ],
     "experiments": {
       "baseUrl": "/Notes"
-    }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }
