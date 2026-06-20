@@ -19,7 +19,6 @@ import {
 } from '../lib/dates';
 import { dayStatus } from '../lib/habits';
 import DayDetailModal from './DayDetailModal';
-import Legend from './Legend';
 
 export default function CalendarScreen() {
   const { habits, completions } = useStore();
@@ -124,8 +123,6 @@ export default function CalendarScreen() {
             })}
           </View>
         ))}
-
-        <Legend />
       </ScrollView>
 
       <DayDetailModal
