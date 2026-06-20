@@ -46,6 +46,7 @@ export function periodKeyFor(habit: Habit, day: Date): string {
  * A habit is never scheduled before the day it was created.
  */
 export function isScheduledOn(habit: Habit, day: Date): boolean {
+  if (habit.archived) return false;
   const created = parseDateKey(habit.createdAt);
   if (day < created) return false;
 
@@ -132,4 +133,122 @@ export function scheduleDescription(habit: Habit): string {
       return `Monthly · ${d}${suffix}`;
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Stats: occurrences, streaks, completion rate
+// ---------------------------------------------------------------------------
+
+/** Hard cap so a far-past createdAt can never produce an unbounded loop. */
+const MAX_OCCURRENCES = 1000;
+
+/**
+ * Ascending list of the dates this habit was scheduled on, from `createdAt`
+ * up to and including `until` (one entry per period). Ignores `archived`
+ * so history/stats remain available for paused habits.
+ */
+export function scheduledOccurrences(habit: Habit, until: Date): Date[] {
+  const created = parseDateKey(habit.createdAt);
+  const out: Date[] = [];
+  if (until < created) return out;
+
+  if (habit.frequency === 'daily') {
+    const d = new Date(created);
+    while (d <= until && out.length < MAX_OCCURRENCES) {
+      out.push(new Date(d));
+      d.setDate(d.getDate() + 1);
+    }
+  } else if (habit.frequency === 'weekly') {
+    const weekday = habit.weekday ?? 1;
+    const d = new Date(created);
+    // advance to the first scheduled weekday on/after createdAt
+    while (d.getDay() !== weekday) d.setDate(d.getDate() + 1);
+    while (d <= until && out.length < MAX_OCCURRENCES) {
+      out.push(new Date(d));
+      d.setDate(d.getDate() + 7);
+    }
+  } else {
+    const wanted = habit.monthDay ?? 1;
+    // start from createdAt's month
+    const cur = new Date(created.getFullYear(), created.getMonth(), 1);
+    while (out.length < MAX_OCCURRENCES) {
+      const lastDay = new Date(cur.getFullYear(), cur.getMonth() + 1, 0).getDate();
+      const day = new Date(cur.getFullYear(), cur.getMonth(), Math.min(wanted, lastDay));
+      if (day > until) break;
+      if (day >= created) out.push(day);
+      cur.setMonth(cur.getMonth() + 1);
+    }
+  }
+  return out;
+}
+
+export interface HabitStats {
+  current: number;
+  best: number;
+  /** completed / elapsed periods, in [0, 1]; null when nothing has elapsed. */
+  rate: number | null;
+}
+
+/**
+ * Streaks and completion rate for a habit as of `today`. The current period
+ * (today / this week / this month) being unticked does NOT break the current
+ * streak — it's still in progress.
+ */
+export function habitStats(
+  completions: Completions,
+  habit: Habit,
+  today: Date,
+): HabitStats {
+  const occ = scheduledOccurrences(habit, today);
+  const done = (d: Date) => isCompleted(completions, habit, d);
+
+  // best streak across all history
+  let best = 0;
+  let run = 0;
+  for (const d of occ) {
+    if (done(d)) {
+      run += 1;
+      if (run > best) best = run;
+    } else {
+      run = 0;
+    }
+  }
+
+  // current streak, counting back from the most recent occurrence
+  let i = occ.length - 1;
+  const currentPeriod = periodKeyFor(habit, today);
+  if (i >= 0 && periodKeyFor(habit, occ[i]) === currentPeriod && !done(occ[i])) {
+    i -= 1; // current period not ticked yet — grace, don't break
+  }
+  let current = 0;
+  while (i >= 0 && done(occ[i])) {
+    current += 1;
+    i -= 1;
+  }
+
+  // completion rate over elapsed periods (exclude the in-progress current one)
+  const elapsed = occ.filter(
+    (d) => periodKeyFor(habit, d) !== currentPeriod,
+  );
+  const completedCount = elapsed.filter(done).length;
+  const rate = elapsed.length === 0 ? null : completedCount / elapsed.length;
+
+  return { current, best, rate };
+}
+
+/**
+ * The most recent `count` occurrences with their completion state, oldest
+ * first — used to draw a per-habit heatmap.
+ */
+export function recentHistory(
+  completions: Completions,
+  habit: Habit,
+  today: Date,
+  count: number,
+): { key: string; done: boolean }[] {
+  const occ = scheduledOccurrences(habit, today);
+  return occ.slice(-count).map((d) => ({
+    key: periodKeyFor(habit, d),
+    done: isCompleted(completions, habit, d),
+  }));
 }

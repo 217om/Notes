@@ -17,7 +17,27 @@ export interface Habit {
    * Defaults to 1.
    */
   monthDay?: number;
+  /** Archived habits keep their history but are no longer scheduled/shown. */
+  archived?: boolean;
 }
+
+export type ThemePref = 'system' | 'light' | 'dark';
+
+/** 0 = weeks start on Sunday, 1 = weeks start on Monday. */
+export type WeekStart = 0 | 1;
+
+export interface Settings {
+  theme: ThemePref;
+  weekStart: WeekStart;
+  /** Use a colourblind-safe (blue→yellow) calendar scale instead of red→green. */
+  colorblind: boolean;
+}
+
+export const DEFAULT_SETTINGS: Settings = {
+  theme: 'system',
+  weekStart: 0,
+  colorblind: false,
+};
 
 /**
  * Completion records, keyed by habit id and then by a "period key".
@@ -31,6 +51,7 @@ export type Completions = Record<string, Record<string, boolean>>;
 export interface AppState {
   habits: Habit[];
   completions: Completions;
+  settings: Settings;
 }
 
 /** Aggregated completion status for a single calendar day. */

@@ -10,12 +10,14 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../lib/store';
 import { Theme, font, useTheme } from '../lib/theme';
+import { tickHaptic } from '../lib/haptics';
 import { MONTH_NAMES, WEEKDAY_LABELS } from '../lib/dates';
 import {
   FREQUENCY_LABELS,
   dayStatus,
   isCompleted,
 } from '../lib/habits';
+import AnimatedCheck from './AnimatedCheck';
 
 export default function DayDetailModal({
   day,
@@ -61,21 +63,13 @@ export default function DayDetailModal({
                   <Pressable
                     key={habit.id}
                     style={styles.row}
-                    onPress={() => toggle(habit, day)}
+                    onPress={() => {
+                      toggle(habit, day);
+                      tickHaptic();
+                    }}
+                    accessibilityLabel={`Toggle ${habit.name}`}
                   >
-                    <View
-                      style={[
-                        styles.checkbox,
-                        {
-                          backgroundColor: done ? habit.color : 'transparent',
-                          borderColor: habit.color,
-                        },
-                      ]}
-                    >
-                      {done && (
-                        <Ionicons name="checkmark" size={16} color="#fff" />
-                      )}
-                    </View>
+                    <AnimatedCheck done={done} color={habit.color} size={28} />
                     <View style={styles.rowText}>
                       <Text
                         style={[styles.habitName, done && styles.habitNameDone]}

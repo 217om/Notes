@@ -56,14 +56,22 @@ export const MONTH_NAMES = [
 
 export const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+/** Weekday labels rotated so the chosen start day comes first. */
+export function weekdayLabels(weekStart: number): string[] {
+  return [
+    ...WEEKDAY_LABELS.slice(weekStart),
+    ...WEEKDAY_LABELS.slice(0, weekStart),
+  ];
+}
+
 /**
  * Build the grid of dates for a month view. Returns whole weeks (rows of 7),
  * padded with the trailing days of the previous month and leading days of the
- * next month so every row is full. Weeks start on Sunday.
+ * next month so every row is full. `weekStart` is 0 (Sunday) or 1 (Monday).
  */
-export function monthMatrix(year: number, month: number): Date[][] {
+export function monthMatrix(year: number, month: number, weekStart = 0): Date[][] {
   const first = new Date(year, month, 1);
-  const startOffset = first.getDay(); // 0 = Sunday
+  const startOffset = (first.getDay() - weekStart + 7) % 7;
   const gridStart = new Date(year, month, 1 - startOffset);
 
   const weeks: Date[][] = [];

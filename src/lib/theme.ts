@@ -1,4 +1,5 @@
 import { useColorScheme } from 'react-native';
+import { useStore } from './store';
 
 /** Public Sans family names (loaded in App via @expo-google-fonts/public-sans). */
 export const font = {
@@ -68,7 +69,10 @@ const dark: Theme = {
 
 export function useTheme(): Theme {
   const scheme = useColorScheme();
-  return scheme === 'dark' ? dark : light;
+  const { settings } = useStore();
+  const pref = settings.theme;
+  const isDark = pref === 'system' ? scheme === 'dark' : pref === 'dark';
+  return isDark ? dark : light;
 }
 
 /** Linear interpolation between two hex colours. t in [0, 1]. */
@@ -87,13 +91,23 @@ const SCALE = {
   done: '#22c55e', // green
 };
 
+// Colourblind-safe scale: a blue (low) → yellow (high) ramp, which stays
+// distinguishable for red-green colour vision deficiency.
+const CB_LOW = '#2c7bb6';
+const CB_HIGH = '#ffd92f';
+
 /**
  * Maps a completion ratio to a colour:
  *   null -> transparent (nothing scheduled)
- *   0    -> red, ~0.5 -> orange, ~0.9 -> yellow, 1 -> green
+ *   default : 0 red, ~0.5 orange, ~0.9 yellow, 1 green
+ *   colourblind : 0 blue → 1 yellow
  */
-export function ratioColor(ratio: number | null): string {
+export function ratioColor(ratio: number | null, colorblind = false): string {
   if (ratio === null) return 'transparent';
+  if (colorblind) {
+    const t = Math.max(0, Math.min(1, ratio));
+    return lerpColor(CB_LOW, CB_HIGH, t);
+  }
   if (ratio <= 0) return SCALE.none;
   if (ratio >= 1) return SCALE.done;
   if (ratio < 0.5) return lerpColor(SCALE.none, SCALE.low, ratio / 0.5);

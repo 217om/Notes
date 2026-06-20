@@ -11,17 +11,17 @@ import { useStore } from '../lib/store';
 import { Theme, font, ratioColor, useTheme } from '../lib/theme';
 import {
   MONTH_NAMES,
-  WEEKDAY_LABELS,
   dateKey,
   isSameDay,
   monthMatrix,
   startOfToday,
+  weekdayLabels,
 } from '../lib/dates';
 import { dayStatus } from '../lib/habits';
 import DayDetailModal from './DayDetailModal';
 
 export default function CalendarScreen() {
-  const { habits, completions } = useStore();
+  const { habits, completions, settings } = useStore();
   const theme = useTheme();
   const styles = useMemo(() => makeStyles(theme), [theme]);
   const today = startOfToday();
@@ -31,8 +31,12 @@ export default function CalendarScreen() {
   const [selected, setSelected] = useState<Date | null>(null);
 
   const weeks = useMemo(
-    () => monthMatrix(viewYear, viewMonth),
-    [viewYear, viewMonth],
+    () => monthMatrix(viewYear, viewMonth, settings.weekStart),
+    [viewYear, viewMonth, settings.weekStart],
+  );
+  const labels = useMemo(
+    () => weekdayLabels(settings.weekStart),
+    [settings.weekStart],
   );
 
   const goPrev = () => {
@@ -53,21 +57,21 @@ export default function CalendarScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Pressable onPress={goPrev} style={styles.navBtn} hitSlop={8}>
+        <Pressable onPress={goPrev} style={styles.navBtn} hitSlop={8} accessibilityLabel="Previous month">
           <Ionicons name="chevron-back" size={22} color={theme.text} />
         </Pressable>
-        <Pressable onPress={goToday}>
+        <Pressable onPress={goToday} accessibilityLabel="Jump to current month">
           <Text style={styles.monthLabel}>
             {MONTH_NAMES[viewMonth]} {viewYear}
           </Text>
         </Pressable>
-        <Pressable onPress={goNext} style={styles.navBtn} hitSlop={8}>
+        <Pressable onPress={goNext} style={styles.navBtn} hitSlop={8} accessibilityLabel="Next month">
           <Ionicons name="chevron-forward" size={22} color={theme.text} />
         </Pressable>
       </View>
 
       <View style={styles.weekHeader}>
-        {WEEKDAY_LABELS.map((d) => (
+        {labels.map((d) => (
           <Text key={d} style={styles.weekHeaderCell}>
             {d}
           </Text>
@@ -83,10 +87,10 @@ export default function CalendarScreen() {
               const isToday = isSameDay(day, today);
               const status = dayStatus(habits, completions, day);
 
-              // Past / present days with scheduled habits get a status colour;
-              // future days stay neutral (you can't have done them yet).
               const showStatus = !isFuture && status.total > 0;
-              const bg = showStatus ? ratioColor(status.ratio) : 'transparent';
+              const bg = showStatus
+                ? ratioColor(status.ratio, settings.colorblind)
+                : 'transparent';
               const fullyDone = status.ratio === 1 && showStatus;
 
               return (
@@ -99,6 +103,7 @@ export default function CalendarScreen() {
                     isToday && styles.dayCellToday,
                   ]}
                   onPress={() => setSelected(day)}
+                  accessibilityLabel={`${dateKey(day)}, ${status.completed} of ${status.total} done`}
                 >
                   <Text
                     style={[
@@ -111,12 +116,19 @@ export default function CalendarScreen() {
                   </Text>
                   {fullyDone ? (
                     <Ionicons name="checkmark" size={12} color="#052e16" />
-                  ) : !isFuture && status.total > 0 ? (
+                  ) : showStatus ? (
                     <Text style={styles.dayMeta}>
                       {status.completed}/{status.total}
                     </Text>
                   ) : isFuture && status.total > 0 ? (
-                    <View style={styles.dueDot} />
+                    <View style={styles.dotRow}>
+                      {status.due.slice(0, 4).map((h) => (
+                        <View
+                          key={h.id}
+                          style={[styles.dueDot, { backgroundColor: h.color }]}
+                        />
+                      ))}
+                    </View>
                   ) : (
                     <View style={styles.dayMetaSpacer} />
                   )}
@@ -174,11 +186,6 @@ const makeStyles = (t: Theme) =>
     dayNumberOnColor: { color: '#0b1220' },
     dayMeta: { fontSize: 10, color: '#0b1220', fontFamily: font.bold },
     dayMetaSpacer: { height: 12 },
-    dueDot: {
-      width: 5,
-      height: 5,
-      borderRadius: 3,
-      backgroundColor: t.textMuted,
-      marginTop: 2,
-    },
+    dotRow: { flexDirection: 'row', gap: 3, height: 12, alignItems: 'center' },
+    dueDot: { width: 5, height: 5, borderRadius: 3 },
   });
