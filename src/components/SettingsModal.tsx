@@ -1,12 +1,5 @@
 import React, { useMemo } from 'react';
-import {
-  Modal,
-  Pressable,
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-} from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../lib/store';
 import { Theme, font, useTheme } from '../lib/theme';
@@ -90,21 +83,6 @@ export default function SettingsModal({
               { label: 'Monday', value: 1 },
             ]}
           />
-
-          <View style={styles.switchRow}>
-            <View style={styles.switchText}>
-              <Text style={styles.switchTitle}>Colourblind-safe colours</Text>
-              <Text style={styles.switchSub}>
-                Use a blue→yellow calendar scale instead of red→green.
-              </Text>
-            </View>
-            <Switch
-              value={settings.colorblind}
-              onValueChange={(v) => updateSettings({ colorblind: v })}
-              trackColor={{ true: theme.primary, false: theme.surfaceAlt }}
-              thumbColor={theme.bg}
-            />
-          </View>
         </Pressable>
       </Pressable>
     </Modal>
@@ -168,14 +146,4 @@ const makeStyles = (t: Theme) =>
     segmentItemActive: { backgroundColor: t.primary },
     segmentText: { color: t.textMuted, fontFamily: font.semibold },
     segmentTextActive: { color: t.onPrimary },
-    switchRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginTop: 24,
-      gap: 16,
-    },
-    switchText: { flex: 1 },
-    switchTitle: { color: t.text, fontFamily: font.semibold, fontSize: 15 },
-    switchSub: { color: t.textMuted, fontSize: 12, marginTop: 2 },
   });

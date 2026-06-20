@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../lib/store';
-import { Theme, font, ratioColor, useTheme } from '../lib/theme';
+import { Theme, font, useTheme } from '../lib/theme';
 import {
   MONTH_NAMES,
   dateKey,
@@ -88,9 +88,6 @@ export default function CalendarScreen() {
               const status = dayStatus(habits, completions, day);
 
               const showStatus = !isFuture && status.total > 0;
-              const bg = showStatus
-                ? ratioColor(status.ratio, settings.colorblind)
-                : 'transparent';
               const fullyDone = status.ratio === 1 && showStatus;
 
               return (
@@ -98,7 +95,6 @@ export default function CalendarScreen() {
                   key={dateKey(day)}
                   style={[
                     styles.dayCell,
-                    { backgroundColor: bg },
                     !inMonth && styles.dayCellOutside,
                     isToday && styles.dayCellToday,
                   ]}
@@ -106,29 +102,16 @@ export default function CalendarScreen() {
                   accessibilityLabel={`${dateKey(day)}, ${status.completed} of ${status.total} done`}
                 >
                   <Text
-                    style={[
-                      styles.dayNumber,
-                      !inMonth && styles.dayNumberOutside,
-                      showStatus && styles.dayNumberOnColor,
-                    ]}
+                    style={[styles.dayNumber, !inMonth && styles.dayNumberOutside]}
                   >
                     {day.getDate()}
                   </Text>
                   {fullyDone ? (
-                    <Ionicons name="checkmark" size={12} color="#052e16" />
+                    <Ionicons name="checkmark" size={12} color={theme.primary} />
                   ) : showStatus ? (
                     <Text style={styles.dayMeta}>
                       {status.completed}/{status.total}
                     </Text>
-                  ) : isFuture && status.total > 0 ? (
-                    <View style={styles.dotRow}>
-                      {status.due.slice(0, 4).map((h) => (
-                        <View
-                          key={h.id}
-                          style={[styles.dueDot, { backgroundColor: h.color }]}
-                        />
-                      ))}
-                    </View>
                   ) : (
                     <View style={styles.dayMetaSpacer} />
                   )}
@@ -183,9 +166,6 @@ const makeStyles = (t: Theme) =>
     dayCellToday: { borderWidth: 2, borderColor: t.primary },
     dayNumber: { fontSize: 14, fontFamily: font.semibold, color: t.text },
     dayNumberOutside: { color: t.textMuted },
-    dayNumberOnColor: { color: '#0b1220' },
-    dayMeta: { fontSize: 10, color: '#0b1220', fontFamily: font.bold },
+    dayMeta: { fontSize: 10, color: t.textMuted, fontFamily: font.bold },
     dayMetaSpacer: { height: 12 },
-    dotRow: { flexDirection: 'row', gap: 3, height: 12, alignItems: 'center' },
-    dueDot: { width: 5, height: 5, borderRadius: 3 },
   });

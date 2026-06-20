@@ -29,14 +29,11 @@ export type WeekStart = 0 | 1;
 export interface Settings {
   theme: ThemePref;
   weekStart: WeekStart;
-  /** Use a colourblind-safe (blue→yellow) calendar scale instead of red→green. */
-  colorblind: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   weekStart: 0,
-  colorblind: false,
 };
 
 /**
