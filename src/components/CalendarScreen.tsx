@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../lib/store';
-import { colors, ratioColor } from '../lib/theme';
+import { Theme, font, ratioColor, useTheme } from '../lib/theme';
 import {
   MONTH_NAMES,
   WEEKDAY_LABELS,
@@ -22,6 +22,8 @@ import DayDetailModal from './DayDetailModal';
 
 export default function CalendarScreen() {
   const { habits, completions } = useStore();
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const today = startOfToday();
 
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -52,7 +54,7 @@ export default function CalendarScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Pressable onPress={goPrev} style={styles.navBtn} hitSlop={8}>
-          <Ionicons name="chevron-back" size={22} color={colors.text} />
+          <Ionicons name="chevron-back" size={22} color={theme.text} />
         </Pressable>
         <Pressable onPress={goToday}>
           <Text style={styles.monthLabel}>
@@ -60,7 +62,7 @@ export default function CalendarScreen() {
           </Text>
         </Pressable>
         <Pressable onPress={goNext} style={styles.navBtn} hitSlop={8}>
-          <Ionicons name="chevron-forward" size={22} color={colors.text} />
+          <Ionicons name="chevron-forward" size={22} color={theme.text} />
         </Pressable>
       </View>
 
@@ -134,79 +136,49 @@ export default function CalendarScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 12 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 16,
-  },
-  navBtn: {
-    padding: 6,
-    borderRadius: 8,
-  },
-  monthLabel: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  weekHeader: {
-    flexDirection: 'row',
-    marginBottom: 6,
-  },
-  weekHeaderCell: {
-    flex: 1,
-    textAlign: 'center',
-    color: colors.textMuted,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  scroll: { paddingBottom: 24 },
-  weekRow: {
-    flexDirection: 'row',
-  },
-  dayCell: {
-    flex: 1,
-    aspectRatio: 1,
-    margin: 2,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-  },
-  dayCellOutside: {
-    opacity: 0.35,
-  },
-  dayCellToday: {
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  dayNumber: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  dayNumberOutside: {
-    color: colors.textMuted,
-  },
-  dayNumberOnColor: {
-    color: '#0b1220',
-  },
-  dayMeta: {
-    fontSize: 10,
-    color: '#0b1220',
-    fontWeight: '700',
-  },
-  dayMetaSpacer: {
-    height: 12,
-  },
-  dueDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: colors.textMuted,
-    marginTop: 2,
-  },
-});
+const makeStyles = (t: Theme) =>
+  StyleSheet.create({
+    container: { flex: 1, paddingHorizontal: 12 },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 16,
+    },
+    navBtn: { padding: 6, borderRadius: 8 },
+    monthLabel: { fontSize: 20, fontFamily: font.bold, color: t.text },
+    weekHeader: { flexDirection: 'row', marginBottom: 6 },
+    weekHeaderCell: {
+      flex: 1,
+      textAlign: 'center',
+      color: t.textMuted,
+      fontSize: 12,
+      fontFamily: font.semibold,
+    },
+    scroll: { paddingBottom: 130 },
+    weekRow: { flexDirection: 'row' },
+    dayCell: {
+      flex: 1,
+      aspectRatio: 1,
+      margin: 2,
+      borderRadius: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: t.border,
+    },
+    dayCellOutside: { opacity: 0.35 },
+    dayCellToday: { borderWidth: 2, borderColor: t.primary },
+    dayNumber: { fontSize: 14, fontFamily: font.semibold, color: t.text },
+    dayNumberOutside: { color: t.textMuted },
+    dayNumberOnColor: { color: '#0b1220' },
+    dayMeta: { fontSize: 10, color: '#0b1220', fontFamily: font.bold },
+    dayMetaSpacer: { height: 12 },
+    dueDot: {
+      width: 5,
+      height: 5,
+      borderRadius: 3,
+      backgroundColor: t.textMuted,
+      marginTop: 2,
+    },
+  });

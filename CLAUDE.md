@@ -27,7 +27,7 @@ There are **no unit tests and no linter configured**. `npm run typecheck` is the
 
 ## Architecture
 
-**No expo-router.** The app is a single `App.tsx` that holds the active-tab in `useState` and swaps between `CalendarScreen` and `HabitsScreen`, with a custom bottom tab bar. Everything is wrapped in `StoreProvider`.
+**No expo-router.** The app is a single `App.tsx` that holds the active-tab in `useState` and swaps between `CalendarScreen` and `HabitsScreen`. The bottom nav is a custom **frosted "liquid-glass" floating tab bar** (`expo-blur` `BlurView` + a spring-animated sliding pill and per-tab press scaling). Public Sans is loaded via `@expo-google-fonts/public-sans` in `App.tsx`, which gates render until fonts are ready. Everything is wrapped in `StoreProvider`.
 
 **State** lives in one React context: `src/lib/store.tsx` (`useStore()`). It loads/persists the whole `{ habits, completions }` blob via `src/lib/storage.ts` (AsyncStorage). Mutations go through `addHabit`/`updateHabit`/`removeHabit`/`toggle`.
 
@@ -38,7 +38,7 @@ There are **no unit tests and no linter configured**. `npm run typecheck` is the
   This is why a weekly/monthly habit is ticked once per period rather than per day.
 - `src/lib/dates.ts` — date-key formatting, ISO-week computation, and `monthMatrix()` (always renders 6 weeks).
 - `src/lib/habits.ts` — the core: `isScheduledOn()` (which habits appear on a given day), `periodKeyFor()`, `toggleCompletion()`, and `dayStatus()` (aggregates a day's completion ratio). A habit is never scheduled before its `createdAt`.
-- `src/lib/theme.ts` — `ratioColor()` maps a completion ratio to the red→orange→yellow→green scale used by calendar cells.
+- `src/lib/theme.ts` — the **monochrome theme**: `useTheme()` returns a black/white palette that flips with the OS color scheme (`useColorScheme`), the `Theme` type, and `font` (Public Sans family names). Components build styles via a local `makeStyles(theme)` memoized on the theme. `ratioColor()` maps a completion ratio to the red→orange→yellow→green scale used by calendar cells — kept colourful on purpose (it's the calendar's whole point), independent of the monochrome chrome. Per-habit colours (`HABIT_COLORS`) are user data and also stay colourful.
 
 `src/components/` is presentation only (`CalendarScreen`, `HabitsScreen`, `HabitFormModal`, `DayDetailModal`, `Legend`) and should defer all date/scheduling math to `src/lib`.
 

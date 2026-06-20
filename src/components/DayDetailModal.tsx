@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Modal,
   Pressable,
@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../lib/store';
-import { colors } from '../lib/theme';
+import { Theme, font, useTheme } from '../lib/theme';
 import { MONTH_NAMES, WEEKDAY_LABELS } from '../lib/dates';
 import {
   FREQUENCY_LABELS,
@@ -27,6 +27,8 @@ export default function DayDetailModal({
   onClose: () => void;
 }) {
   const { habits, completions, toggle } = useStore();
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
 
   if (!day) return null;
   const status = dayStatus(habits, completions, day);
@@ -45,7 +47,7 @@ export default function DayDetailModal({
           <View style={styles.header}>
             <Text style={styles.title}>{title}</Text>
             <Pressable onPress={onClose} hitSlop={10}>
-              <Ionicons name="close" size={24} color={colors.textMuted} />
+              <Ionicons name="close" size={24} color={theme.textMuted} />
             </Pressable>
           </View>
 
@@ -98,76 +100,63 @@ export default function DayDetailModal({
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    maxHeight: '75%',
-    width: '100%',
-    maxWidth: 720,
-    alignSelf: 'center',
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.border,
-    alignSelf: 'center',
-    marginBottom: 12,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  empty: {
-    color: colors.textMuted,
-    paddingVertical: 24,
-    textAlign: 'center',
-  },
-  list: {
-    marginTop: 4,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    gap: 14,
-  },
-  checkbox: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rowText: { flex: 1 },
-  habitName: {
-    fontSize: 16,
-    color: colors.text,
-    fontWeight: '500',
-  },
-  habitNameDone: {
-    textDecorationLine: 'line-through',
-    color: colors.textMuted,
-  },
-  habitFreq: {
-    fontSize: 12,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-});
+const makeStyles = (t: Theme) =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'flex-end',
+    },
+    sheet: {
+      backgroundColor: t.surface,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      padding: 20,
+      maxHeight: '75%',
+      width: '100%',
+      maxWidth: 720,
+      alignSelf: 'center',
+    },
+    handle: {
+      width: 40,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: t.hairline,
+      alignSelf: 'center',
+      marginBottom: 12,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 12,
+    },
+    title: { fontSize: 18, fontFamily: font.bold, color: t.text },
+    empty: {
+      color: t.textMuted,
+      paddingVertical: 24,
+      textAlign: 'center',
+    },
+    list: { marginTop: 4 },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 12,
+      gap: 14,
+    },
+    checkbox: {
+      width: 28,
+      height: 28,
+      borderRadius: 8,
+      borderWidth: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    rowText: { flex: 1 },
+    habitName: { fontSize: 16, color: t.text, fontFamily: font.medium },
+    habitNameDone: {
+      textDecorationLine: 'line-through',
+      color: t.textMuted,
+    },
+    habitFreq: { fontSize: 12, color: t.textMuted, marginTop: 2 },
+  });

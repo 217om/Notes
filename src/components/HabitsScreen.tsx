@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../lib/store';
-import { colors } from '../lib/theme';
+import { Theme, font, useTheme } from '../lib/theme';
 import { startOfToday } from '../lib/dates';
 import {
   FREQUENCY_LABELS,
@@ -31,6 +31,8 @@ function currentPeriodLabel(habit: Habit): string {
 
 export default function HabitsScreen() {
   const { habits, completions, toggle, removeHabit } = useStore();
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const today = startOfToday();
 
   const [formOpen, setFormOpen] = useState(false);
@@ -50,14 +52,14 @@ export default function HabitsScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Habits</Text>
         <Pressable style={styles.addBtn} onPress={openAdd}>
-          <Ionicons name="add" size={20} color="#fff" />
+          <Ionicons name="add" size={20} color={theme.onPrimary} />
           <Text style={styles.addBtnText}>New</Text>
         </Pressable>
       </View>
 
       {habits.length === 0 ? (
         <View style={styles.emptyState}>
-          <Ionicons name="leaf-outline" size={48} color={colors.textMuted} />
+          <Ionicons name="leaf-outline" size={48} color={theme.textMuted} />
           <Text style={styles.emptyTitle}>No habits yet</Text>
           <Text style={styles.emptySubtitle}>
             Add daily, weekly, or monthly habits and tick them off as you go.
@@ -115,7 +117,7 @@ export default function HabitsScreen() {
                   <Ionicons
                     name="trash-outline"
                     size={18}
-                    color={colors.textMuted}
+                    color={theme.textMuted}
                   />
                 </Pressable>
               </View>
@@ -133,70 +135,67 @@ export default function HabitsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 16 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 16,
-  },
-  title: { fontSize: 24, fontWeight: '700', color: colors.text },
-  addBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: colors.primary,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 10,
-  },
-  addBtnText: { color: '#fff', fontWeight: '600' },
-  emptyState: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingHorizontal: 32,
-  },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
-  emptySubtitle: {
-    fontSize: 14,
-    color: colors.textMuted,
-    textAlign: 'center',
-  },
-  list: { paddingBottom: 24, gap: 10 },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    padding: 14,
-    gap: 12,
-  },
-  checkArea: {},
-  checkbox: {
-    width: 32,
-    height: 32,
-    borderRadius: 9,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardBody: { flex: 1, gap: 4 },
-  habitName: { fontSize: 16, fontWeight: '600', color: colors.text },
-  habitNameDone: {
-    textDecorationLine: 'line-through',
-    color: colors.textMuted,
-  },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  badgeText: { fontSize: 11, fontWeight: '700' },
-  schedule: { fontSize: 12, color: colors.textMuted },
-  periodHint: { fontSize: 12, color: colors.textMuted },
-  deleteBtn: { padding: 4 },
-});
+const makeStyles = (t: Theme) =>
+  StyleSheet.create({
+    container: { flex: 1, paddingHorizontal: 16 },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 16,
+    },
+    title: { fontSize: 24, fontFamily: font.bold, color: t.text },
+    addBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: t.primary,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 10,
+    },
+    addBtnText: { color: t.onPrimary, fontFamily: font.semibold },
+    emptyState: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      paddingHorizontal: 32,
+    },
+    emptyTitle: { fontSize: 18, fontFamily: font.bold, color: t.text },
+    emptySubtitle: {
+      fontSize: 14,
+      color: t.textMuted,
+      textAlign: 'center',
+    },
+    list: { paddingBottom: 130, gap: 10 },
+    card: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: t.surface,
+      borderRadius: 14,
+      padding: 14,
+      gap: 12,
+    },
+    checkArea: {},
+    checkbox: {
+      width: 32,
+      height: 32,
+      borderRadius: 9,
+      borderWidth: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    cardBody: { flex: 1, gap: 4 },
+    habitName: { fontSize: 16, fontFamily: font.semibold, color: t.text },
+    habitNameDone: {
+      textDecorationLine: 'line-through',
+      color: t.textMuted,
+    },
+    metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
+    badgeText: { fontSize: 11, fontFamily: font.bold },
+    schedule: { fontSize: 12, color: t.textMuted },
+    periodHint: { fontSize: 12, color: t.textMuted },
+    deleteBtn: { padding: 4 },
+  });

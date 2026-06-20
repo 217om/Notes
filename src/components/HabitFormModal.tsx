@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../lib/store';
-import { colors } from '../lib/theme';
+import { Theme, font, useTheme } from '../lib/theme';
 import { WEEKDAY_LABELS } from '../lib/dates';
 import { FREQUENCY_LABELS, HABIT_COLORS } from '../lib/habits';
 import { Frequency, Habit } from '../lib/types';
@@ -27,6 +27,8 @@ export default function HabitFormModal({
   onClose: () => void;
 }) {
   const { addHabit, updateHabit } = useStore();
+  const theme = useTheme();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
 
   const [name, setName] = useState('');
   const [frequency, setFrequency] = useState<Frequency>('daily');
@@ -78,7 +80,7 @@ export default function HabitFormModal({
               {habit ? 'Edit habit' : 'New habit'}
             </Text>
             <Pressable onPress={onClose} hitSlop={10}>
-              <Ionicons name="close" size={24} color={colors.textMuted} />
+              <Ionicons name="close" size={24} color={theme.textMuted} />
             </Pressable>
           </View>
 
@@ -89,7 +91,7 @@ export default function HabitFormModal({
               value={name}
               onChangeText={setName}
               placeholder="e.g. Drink water"
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColor={theme.textMuted}
               autoFocus
             />
 
@@ -201,112 +203,113 @@ export default function HabitFormModal({
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    maxHeight: '88%',
-    width: '100%',
-    maxWidth: 720,
-    alignSelf: 'center',
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.border,
-    alignSelf: 'center',
-    marginBottom: 12,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  title: { fontSize: 18, fontWeight: '700', color: colors.text },
-  label: {
-    color: colors.textMuted,
-    fontSize: 13,
-    fontWeight: '600',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: colors.bg,
-    borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: colors.text,
-    fontSize: 16,
-  },
-  segment: {
-    flexDirection: 'row',
-    backgroundColor: colors.bg,
-    borderRadius: 10,
-    padding: 4,
-    gap: 4,
-  },
-  segmentItem: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  segmentItemActive: { backgroundColor: colors.primary },
-  segmentText: { color: colors.textMuted, fontWeight: '600' },
-  segmentTextActive: { color: '#fff' },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: colors.bg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-  },
-  dayChip: {
-    width: 38,
-    paddingVertical: 8,
-    borderRadius: 8,
-    alignItems: 'center',
-    backgroundColor: colors.bg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-  },
-  chipActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  chipText: { color: colors.text, fontWeight: '600', fontSize: 13 },
-  chipTextActive: { color: '#fff' },
-  colorDot: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    borderWidth: 3,
-    borderColor: 'transparent',
-  },
-  colorDotActive: { borderColor: colors.text },
-  hint: { color: colors.textMuted, fontSize: 12, marginTop: 8 },
-  saveBtn: {
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 12,
-  },
-  saveBtnDisabled: { opacity: 0.4 },
-  saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-});
+const makeStyles = (t: Theme) =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'flex-end',
+    },
+    sheet: {
+      backgroundColor: t.surface,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      padding: 20,
+      maxHeight: '88%',
+      width: '100%',
+      maxWidth: 720,
+      alignSelf: 'center',
+    },
+    handle: {
+      width: 40,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: t.hairline,
+      alignSelf: 'center',
+      marginBottom: 12,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 8,
+    },
+    title: { fontSize: 18, fontFamily: font.bold, color: t.text },
+    label: {
+      color: t.textMuted,
+      fontSize: 13,
+      fontFamily: font.semibold,
+      marginTop: 16,
+      marginBottom: 8,
+    },
+    input: {
+      backgroundColor: t.bg,
+      borderRadius: 10,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: t.border,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      color: t.text,
+      fontSize: 16,
+      fontFamily: font.regular,
+    },
+    segment: {
+      flexDirection: 'row',
+      backgroundColor: t.bg,
+      borderRadius: 10,
+      padding: 4,
+      gap: 4,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: t.border,
+    },
+    segmentItem: {
+      flex: 1,
+      paddingVertical: 10,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    segmentItemActive: { backgroundColor: t.primary },
+    segmentText: { color: t.textMuted, fontFamily: font.semibold },
+    segmentTextActive: { color: t.onPrimary },
+    chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    chip: {
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 8,
+      backgroundColor: t.bg,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: t.border,
+    },
+    dayChip: {
+      width: 38,
+      paddingVertical: 8,
+      borderRadius: 8,
+      alignItems: 'center',
+      backgroundColor: t.bg,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: t.border,
+    },
+    chipActive: { backgroundColor: t.primary, borderColor: t.primary },
+    chipText: { color: t.text, fontFamily: font.semibold, fontSize: 13 },
+    chipTextActive: { color: t.onPrimary },
+    colorDot: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      borderWidth: 3,
+      borderColor: 'transparent',
+    },
+    colorDotActive: { borderColor: t.text },
+    hint: { color: t.textMuted, fontSize: 12, marginTop: 8 },
+    saveBtn: {
+      backgroundColor: t.primary,
+      borderRadius: 12,
+      paddingVertical: 14,
+      alignItems: 'center',
+      marginTop: 24,
+      marginBottom: 12,
+    },
+    saveBtnDisabled: { opacity: 0.4 },
+    saveBtnText: { color: t.onPrimary, fontFamily: font.bold, fontSize: 16 },
+  });
